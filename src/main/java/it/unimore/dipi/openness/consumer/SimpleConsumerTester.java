@@ -6,9 +6,9 @@ import it.unimore.dipi.iot.openness.connector.EdgeApplicationConnector;
 import it.unimore.dipi.iot.openness.dto.service.EdgeApplicationServiceDescriptor;
 import it.unimore.dipi.iot.openness.dto.service.EdgeApplicationServiceList;
 import it.unimore.dipi.iot.openness.exception.EdgeApplicationAuthenticatorException;
+import it.unimore.dipi.iot.openness.process.MyNotificationsHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.util.Optional;
 
 /**
@@ -42,15 +42,26 @@ public class SimpleConsumerTester {
 
             logger.info("Application Correctly Authenticated ! AppId: {}", authorizedApplicationConfiguration.getApplicationId());
 
-            EdgeApplicationConnector edgeApplicationConnector = new EdgeApplicationConnector(OPENNESS_CONTROLLER_BASE_APP_URL,
+            EdgeApplicationConnector edgeApplicationConnector = new EdgeApplicationConnector(
+                    OPENNESS_CONTROLLER_BASE_APP_URL,
                     authorizedApplicationConfiguration,
                     OPENNESS_CONTROLLER_BASE_APP_WS_URL);
+
+            //Activate Notification Channel
+            MyNotificationsHandler myNotificationsHandler = new MyNotificationsHandler();
+            edgeApplicationConnector.setupNotificationChannel(NAME_SPACE, APPLICATION_ID, myNotificationsHandler);
 
             EdgeApplicationServiceList availableServices = edgeApplicationConnector.getAvailableServices();
 
             if(availableServices != null && availableServices.getServiceList() != null){
                 for(EdgeApplicationServiceDescriptor edgeApplicationServiceDescriptor : availableServices.getServiceList()){
                     logger.info("Service URN: {} -> {}", edgeApplicationServiceDescriptor.getServiceUrn(), edgeApplicationServiceDescriptor);
+
+                    //Register to traffic information notification
+                    if(edgeApplicationServiceDescriptor.getServiceUrn().getId().equals("opennessProducerDemoTraffic"))
+                        edgeApplicationConnector.postSubscription(edgeApplicationServiceDescriptor.getNotificationDescriptorList(),
+                                edgeApplicationServiceDescriptor.getServiceUrn().getNamespace(),
+                                edgeApplicationServiceDescriptor.getServiceUrn().getId());
                 }
             }
             else
