@@ -48,7 +48,7 @@ public class SimpleConsumerTester {
                     OPENNESS_CONTROLLER_BASE_APP_WS_URL);
 
             //Activate Notification Channel
-            MyNotificationsHandler myNotificationsHandler = new MyNotificationsHandler();
+            ConsumerNotificationsHandler myNotificationsHandler = new ConsumerNotificationsHandler();
             edgeApplicationConnector.setupNotificationChannel(NAME_SPACE, APPLICATION_ID, myNotificationsHandler);
 
             EdgeApplicationServiceList availableServices = edgeApplicationConnector.getAvailableServices();

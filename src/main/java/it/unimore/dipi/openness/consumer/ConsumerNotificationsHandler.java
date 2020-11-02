@@ -14,12 +14,12 @@ import java.io.IOException;
  * @project openness-connector
  * @created 07/10/2020 - 14:03
  */
-public class MyNotificationsHandler extends AbstractWebSocketHandler {
+public class ConsumerNotificationsHandler extends AbstractWebSocketHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(MyNotificationsHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(ConsumerNotificationsHandler.class);
     private ObjectMapper objectMapper;
 
-    public MyNotificationsHandler() {
+    public ConsumerNotificationsHandler() {
         this.objectMapper = new ObjectMapper();
     }
 

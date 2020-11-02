@@ -13,7 +13,7 @@
         <slf4j.version>1.7.26</slf4j.version>
         <jackson.version>2.9.8</jackson.version>
         <logback.version>1.2.3</logback.version>
-        <openness.connector.version>0.0.4</openness.connector.version>
+        <openness.connector.version>0.0.5</openness.connector.version>
         <junit.version>4.13</junit.version>
         <apache-commons.version>3.9</apache-commons.version>
         <apache.httpclient>4.5.12</apache.httpclient>
