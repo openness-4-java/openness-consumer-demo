@@ -6,7 +6,13 @@ import it.unimore.dipi.iot.openness.connector.EdgeApplicationConnector;
 import it.unimore.dipi.iot.openness.dto.service.EdgeApplicationServiceDescriptor;
 import it.unimore.dipi.iot.openness.dto.service.EdgeApplicationServiceList;
 import it.unimore.dipi.iot.openness.exception.EdgeApplicationAuthenticatorException;
-import it.unimore.dipi.iot.openness.process.MyNotificationsHandler;
+import it.unimore.dipi.iot.openness.exception.EdgeApplicationConnectorException;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.Optional;
@@ -58,10 +64,13 @@ public class SimpleConsumerTester {
                     logger.info("Service URN: {} -> {}", edgeApplicationServiceDescriptor.getServiceUrn(), edgeApplicationServiceDescriptor);
 
                     //Register to traffic information notification
-                    if(edgeApplicationServiceDescriptor.getServiceUrn().getId().equals("opennessProducerDemoTraffic"))
+                    if(edgeApplicationServiceDescriptor.getServiceUrn().getId().equals("opennessProducerDemoTraffic")) {
                         edgeApplicationConnector.postSubscription(edgeApplicationServiceDescriptor.getNotificationDescriptorList(),
                                 edgeApplicationServiceDescriptor.getServiceUrn().getNamespace(),
                                 edgeApplicationServiceDescriptor.getServiceUrn().getId());
+                        final String endpoint = edgeApplicationServiceDescriptor.getEndpointUri();
+                        getEvents(endpoint);
+                    }
                 }
             }
             else
@@ -71,6 +80,26 @@ public class SimpleConsumerTester {
             e.printStackTrace();
         }
 
+    }
+
+    private static void getEvents(final String endpoint) throws EdgeApplicationConnectorException {
+        try{
+            logger.debug("Get traffic events list - Target Url: {}", endpoint);
+            HttpGet getEventList = new HttpGet(endpoint);
+            final HttpClient httpClient = HttpClients.createDefault();
+            HttpResponse response = httpClient.execute(getEventList);
+            if(response != null && response.getStatusLine().getStatusCode() == 200){
+                String bodyString = EntityUtils.toString(response.getEntity());
+                logger.debug("Getting traffic events Response Code: {}", response.getStatusLine().getStatusCode());
+                logger.debug("Response Body: {}", bodyString);
+            } else {
+                logger.error("Wrong Response Received !");
+            }
+        }catch (Exception e){
+            String errorMsg = String.format("Error retrieving Service List ! Error: %s", e.getLocalizedMessage());
+            logger.error(errorMsg);
+            throw new EdgeApplicationConnectorException(errorMsg);
+        }
     }
 
     private static AuthorizedApplicationConfiguration handleAuth() throws EdgeApplicationAuthenticatorException {
