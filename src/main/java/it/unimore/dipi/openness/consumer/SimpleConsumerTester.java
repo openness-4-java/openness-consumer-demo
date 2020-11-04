@@ -69,6 +69,7 @@ public class SimpleConsumerTester {
                                 edgeApplicationServiceDescriptor.getServiceUrn().getNamespace(),
                                 edgeApplicationServiceDescriptor.getServiceUrn().getId());
                         final String endpoint = edgeApplicationServiceDescriptor.getEndpointUri();
+                        logger.info("\tGot endpoint: {}", endpoint);
                         getEvents(endpoint);
                     }
                 }
@@ -84,14 +85,14 @@ public class SimpleConsumerTester {
 
     private static void getEvents(final String endpoint) throws EdgeApplicationConnectorException {
         try{
-            logger.debug("Get traffic events list - Target Url: {}", endpoint);
+            logger.info("Get traffic events list - Target Url: {}", endpoint);
             HttpGet getEventList = new HttpGet(endpoint);
             final HttpClient httpClient = HttpClients.createDefault();
             HttpResponse response = httpClient.execute(getEventList);
             if(response != null && response.getStatusLine().getStatusCode() == 200){
                 String bodyString = EntityUtils.toString(response.getEntity());
-                logger.debug("Getting traffic events Response Code: {}", response.getStatusLine().getStatusCode());
-                logger.debug("Response Body: {}", bodyString);
+                logger.info("Getting traffic events Response Code: {}", response.getStatusLine().getStatusCode());
+                logger.info("Response Body: {}", bodyString);
             } else {
                 logger.error("Wrong Response Received !");
             }
