@@ -38,8 +38,7 @@ public class SimpleConsumerTester {
 
         try {
 
-            final String rootPath = Thread.currentThread().getContextClassLoader().getResource("").getPath();
-            final String appConfigPath = rootPath + "urls.properties";
+            final String appConfigPath = Thread.currentThread().getContextClassLoader().getResource("urls.properties").getPath();
             final Properties appProps = new Properties();
             appProps.load(new FileInputStream(appConfigPath));
             final String authUrl = appProps.getProperty("myAuth");
