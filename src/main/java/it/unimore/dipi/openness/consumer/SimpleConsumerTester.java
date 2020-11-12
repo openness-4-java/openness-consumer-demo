@@ -9,13 +9,15 @@ import it.unimore.dipi.iot.openness.exception.EdgeApplicationAuthenticatorExcept
 import it.unimore.dipi.iot.openness.exception.EdgeApplicationConnectorException;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.FileInputStream;
 import java.util.Optional;
+import java.util.Properties;
 
 /**
  * @author Marco Picone, Ph.D. - picone.m@gmail.com
@@ -25,12 +27,6 @@ import java.util.Optional;
 public class SimpleConsumerTester {
 
     public static final Logger logger = LoggerFactory.getLogger(SimpleConsumerTester.class);
-
-    private static final String OPENNESS_CONTROLLER_BASE_AUTH_URL = "http://eaa.openness:7080/";
-
-    private static final String OPENNESS_CONTROLLER_BASE_APP_URL = "https://eaa.openness:7443/";
-
-    private static final String OPENNESS_CONTROLLER_BASE_APP_WS_URL = "wss://eaa.openness:7443/";
 
     private static final String APPLICATION_ID = "opennessConsumerDemo";
 
@@ -42,16 +38,24 @@ public class SimpleConsumerTester {
 
         try {
 
+            final String rootPath = Thread.currentThread().getContextClassLoader().getResource("").getPath();
+            final String appConfigPath = rootPath + "urls.properties";
+            final Properties appProps = new Properties();
+            appProps.load(new FileInputStream(appConfigPath));
+            final String authUrl = appProps.getProperty("myAuth");
+            final String apiUrl = appProps.getProperty("myApi");
+            final String wsUrl = appProps.getProperty("myWs");
+
             logger.info("Starting Simple Openness Consumer Tester ...");
 
-            AuthorizedApplicationConfiguration authorizedApplicationConfiguration = handleAuth();
+            AuthorizedApplicationConfiguration authorizedApplicationConfiguration = handleAuth(authUrl);
 
             logger.info("Application Correctly Authenticated ! AppId: {}", authorizedApplicationConfiguration.getApplicationId());
 
             EdgeApplicationConnector edgeApplicationConnector = new EdgeApplicationConnector(
-                    OPENNESS_CONTROLLER_BASE_APP_URL,
+                    apiUrl,
                     authorizedApplicationConfiguration,
-                    OPENNESS_CONTROLLER_BASE_APP_WS_URL);
+                    wsUrl);
 
             //Activate Notification Channel
             ConsumerNotificationsHandler myNotificationsHandler = new ConsumerNotificationsHandler();
@@ -103,11 +107,11 @@ public class SimpleConsumerTester {
         }
     }
 
-    private static AuthorizedApplicationConfiguration handleAuth() throws EdgeApplicationAuthenticatorException {
+    private static AuthorizedApplicationConfiguration handleAuth(final String authUrl) throws EdgeApplicationAuthenticatorException {
 
         final AuthorizedApplicationConfiguration authorizedApplicationConfiguration;
 
-        final EdgeApplicationAuthenticator edgeApplicationAuthenticator = new EdgeApplicationAuthenticator(OPENNESS_CONTROLLER_BASE_AUTH_URL);
+        final EdgeApplicationAuthenticator edgeApplicationAuthenticator = new EdgeApplicationAuthenticator(authUrl);
 
         final Optional<AuthorizedApplicationConfiguration> storedConfiguration = edgeApplicationAuthenticator.loadExistingAuthorizedApplicationConfiguration(APPLICATION_ID, ORG_NAME);
 
